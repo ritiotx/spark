@@ -257,7 +257,7 @@ if __name__ == "__main__":
     ssc = StreamingContext(sc, 15)
 
     # mandatory to store checkpointed data for Spark Streaming
-    ssc.checkpoint("/Users/Aarti/IdeaProjects/SparkCheckpointedData")
+    ssc.checkpoint("/tmp/SparkCheckpointedData")
 
     # # create worker thread to fetch topic names from Calvin topic and store in
     # # dictionary
@@ -285,8 +285,14 @@ if __name__ == "__main__":
     farenheitTemp = mqttStream.map(
         lambda temp: ((temp * 9 / 5) + 32), 1)
 
+    # If temperature is above some threshold, return false else true. Can be
+    # used to turn on/off Edge device eg. heater at Smart Home
+    threshold = 100.0
+    result = farenheitTemp.map(lambda x: x>threshold)
+
+
     # perform print action
-    farenheitTemp.pprint()
+    result.pprint()
 
     # connect to broker
     connectToBroker(sparkBroker, sparkPort)

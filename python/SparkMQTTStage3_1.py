@@ -241,7 +241,7 @@ if __name__ == "__main__":
     ssc = StreamingContext(sc, 15)
 
     # mandatory to store checkpointed data for Spark Streaming
-    ssc.checkpoint("/Users/Aarti/IdeaProjects/SparkCheckpointedData")
+    ssc.checkpoint("/tmp/SparkCheckpointedData")
 
     # create worker thread to fetch topic names from Calvin topic and store in
     # dictionary
