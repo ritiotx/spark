@@ -36,8 +36,9 @@ from threading import Thread
 from time import sleep
 
 import paho.mqtt.client as mqtt
+import requests
 
-import PahoMQTT
+import PahoMQTTClass
 from pyspark import SparkContext
 from pyspark.streaming import DStream
 from pyspark.streaming import StreamingContext
@@ -104,15 +105,15 @@ def connectToBroker(broker, port):
     DStream.sequenceNum += 1
     childInfo["operation"] = "publish"
     sink = {}
-    sink["type"] = "MQTT"
-    sink["address"] = sparkBroker + ":" + str(sparkPort)
-    sink["channel"] = sparkTopic
+    sink["type"] = "POST"
+    # sink["address"] = sparkBroker + ":" + str(sparkPort)
+    # sink["channel"] = sparkTopic
+    sink["address"] = "http://localhost:8080"
     childInfo["sink"] = sink
     childInfo["parent"] = DStream.parentId
 
     childInfo["uid"] = hashlib.sha224(
-        childInfo["operation"] + sink["type"] + sink["address"] + sink[
-            "channel"] + childInfo["parent"]).hexdigest()
+        childInfo["operation"] + sink["type"] + sink["address"] + childInfo["parent"]).hexdigest()
 
     DStream.parentId = childInfo["uid"]
     DStream.sparkDAG.append(childInfo)
@@ -124,8 +125,13 @@ def updateTopicNames():
     up-to-date
     :return: None
     """
+
+    print("Inside updateTopicNames")
+
     source = DStream.sparkDAG[0]
-    source["source"]["channel"] = list(PahoMQTT.PahoMQTT.topicNames)
+    source["source"]["channel"] = list(PahoMQTTClass.PahoMQTTClass.topicNames)
+
+    print("source[source][channel] = ",source["source"]["channel"])
 
     source["uid"] = hashlib.sha224(
         source["operation"] + source["source"]["type"] + source["source"][
@@ -171,14 +177,23 @@ def publishFromQueue():
 
     global queue
     # keep publishing DAG JSON
-    while True:
-        # wait for 15 seconds before publishing next DAG JSON
-        while not (queue):
+    # while True:
+    #     # wait for 15 seconds before publishing next DAG JSON
+    #     while not (queue):
+    #         sleep(15)
+
+
+    while not (queue):
             sleep(15)
 
-        data = queue.popleft()
-        print(data)
-        mqttc.publish(sparkTopic, data)
+    data = queue.popleft()
+    print(data)
+            # mqttc.publish(sparkTopic, data)
+
+    # POST to Docker machine with Ip address 10.10.10.3
+    url = "http://10.10.10.3:8080"
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url, data=data, headers=headers)
 
 
 def getTopicNames():
@@ -186,7 +201,7 @@ def getTopicNames():
     Get topic names from received MQTT payload
     :return: None
     """
-    mqttTopicClient = PahoMQTT.PahoMQTT()
+    mqttTopicClient = PahoMQTTClass.PahoMQTTClass()
     rc = mqttTopicClient.run(broker, port, topic)
 
 
@@ -204,7 +219,7 @@ def WriteDataToSocket():
 
     while True:
         conn, addr = s.accept()     # Establish connection with client.
-        pahoMqttQueue = PahoMQTT.PahoMQTT().mqttDataQueue
+        pahoMqttQueue = PahoMQTTClass.PahoMQTTClass().mqttDataQueue
         while True:
             while not(pahoMqttQueue):
                 sleep(1)
@@ -221,7 +236,7 @@ def collectDataFromMqttBroker():
     Collects data from MQTT broker using Paho Client
     :return: None
     """
-    mqttTopicClient = PahoMQTT.PahoMQTT()
+    mqttTopicClient = PahoMQTTClass.PahoMQTTClass()
     rc = mqttTopicClient.run(mqttTopicClient.brokerFromCalvin,
                              mqttTopicClient.portFromCalvin, topic)
 
@@ -257,7 +272,7 @@ if __name__ == "__main__":
     ssc = StreamingContext(sc, 15)
 
     # mandatory to store checkpointed data for Spark Streaming
-    ssc.checkpoint("/tmp/SparkCheckpointedData")
+    ssc.checkpoint("../tmp/SparkCheckpointedData")
 
     # # create worker thread to fetch topic names from Calvin topic and store in
     # # dictionary
@@ -290,7 +305,6 @@ if __name__ == "__main__":
     threshold = 100.0
     result = farenheitTemp.map(lambda x: x>threshold)
 
-
     # perform print action
     result.pprint()
 
@@ -301,5 +315,6 @@ if __name__ == "__main__":
     t = threading.Timer(10.0, addToQueue)
     t.start()
 
+    sleep(10)
     # Get DAG JSON from queue and publish to broker for Calvin usage
     publishFromQueue()

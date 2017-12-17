@@ -68,8 +68,9 @@ class CalvinToSpark:
 
     # Calvin broker URI
     brokerUrl = "tcp://iot.eclipse.org:1883"
-    # Topic pattern where temperature data is being sent
-    topic = "edu/rit/iotx/+/temperature"
+    # Topic pattern where preprocessed temperature data is being published
+    # from Calvin
+    topic = "edu/rit/iotx/mapped"
 
     # counters to keep track of running sum and count to calculate average value
     sumAccum = 0
@@ -177,7 +178,7 @@ class CalvinToSpark:
         # connect to Spark cluster "spark:cluster-host:port"
         sc = SparkContext("spark://" + hostAddress + ":" +
                           hostPort,
-                          appName="SparkMQTTStage3_2")
+                          appName="SparkMQTTStage2_1")
         sc.setLogLevel("ERROR")
 
         print("Created Streaming context...")

@@ -18,7 +18,7 @@ from collections import deque
 import paho.mqtt.client as mqtt
 
 
-class PahoMQTT(mqtt.Client):
+class PahoMQTTClass(mqtt.Client):
     """
     Paho mqtt client to connect to MQTT server to received data being
     published by Calvin and collects all different topic names
@@ -41,9 +41,11 @@ class PahoMQTT(mqtt.Client):
         :param msg: data mqtt payload
         :return: None
         """
+        print("\n\n****INSIDE on_message")
 
-        PahoMQTT.topicNames.add(msg.topic)
-        PahoMQTT.mqttDataQueue.append(msg.payload)
+        PahoMQTTClass.topicNames.add(msg.topic)
+        print("PahoMQTTClass.topicNames = ",PahoMQTTClass.topicNames)
+        PahoMQTTClass.mqttDataQueue.append(msg.payload)
 
     def run(self, broker, port, topic):
         """

@@ -42,7 +42,7 @@ from time import sleep
 
 import paho.mqtt.client as mqtt
 
-import PahoMQTT
+import PahoMQTTClass
 from pyspark import SparkContext
 from pyspark.streaming import DStream
 from pyspark.streaming import StreamingContext
@@ -131,7 +131,7 @@ def updateTopicNames():
     :return: None
     """
     source = DStream.sparkDAG[0]
-    source["source"]["channel"] = list(PahoMQTT.PahoMQTT.topicNames)
+    source["source"]["channel"] = list(PahoMQTTClass.PahoMQTTClass.topicNames)
     source["uid"] = hashlib.sha224(
         source["operation"] + source["source"]["type"] + source["source"][
             "address"] + str(
@@ -216,7 +216,7 @@ def getTopicNames():
     Get topic names from received MQTT payload
     :return: None
     """
-    mqttTopicClient = PahoMQTT.PahoMQTT()
+    mqttTopicClient = PahoMQTTClass.PahoMQTTClass()
     rc = mqttTopicClient.run(broker, port, topic)
 
 

@@ -22,7 +22,7 @@ from py4j.protocol import Py4JJavaError
 from pyspark.serializers import UTF8Deserializer
 from pyspark.storagelevel import StorageLevel
 
-import PahoMQTT
+import PahoMQTTClass
 from pyspark.streaming import DStream
 
 __all__ = ['MQTTUtils']
@@ -65,7 +65,7 @@ class MQTTUtils(object):
             source["type"] = "MQTT"
             source["address"] = brokerUrl
 
-            source["channel"] = list(PahoMQTT.PahoMQTT.topicNames)
+            source["channel"] = list(PahoMQTTClass.PahoMQTTClass.topicNames)
             childInfo["source"] = source
 
             childInfo["uid"] = hashlib.sha224(

@@ -268,6 +268,8 @@ if __name__ == "__main__":
     port = 9999                    # Reserve a port for your service.
 
     print("Creating DStream ...")
+
+    # Create socket stream at localhost
     mqttStream = ssc.socketTextStream("localhost", port)
 
     # Convert incoming stream items to float values

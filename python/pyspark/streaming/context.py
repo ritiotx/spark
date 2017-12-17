@@ -28,7 +28,7 @@ from pyspark.streaming.dstream import DStream
 from pyspark.streaming.util import TransformFunction, \
     TransformFunctionSerializer
 
-import PahoMQTT
+import PahoMQTTClass
 from pyspark import RDD, SparkConf
 
 __all__ = ["StreamingContext"]
@@ -272,10 +272,10 @@ class StreamingContext(object):
         childInfo = {}
         childInfo["seqNum"] = DStream.sequenceNum
         DStream.sequenceNum += 1
-        childInfo["operation"] = "createStream"
+        childInfo["operation"] = "socketTextStream"
         source ={}
         source["type"] = "MQTT"
-        mqttTopicClient = PahoMQTT.PahoMQTT()
+        mqttTopicClient = PahoMQTTClass.PahoMQTTClass()
         source["address"] = \
             mqttTopicClient.brokerFromCalvin+"::"+str(mqttTopicClient\
                 .portFromCalvin)
